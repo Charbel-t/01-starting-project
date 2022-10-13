@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import React, { useState, useEffect, useReducer, useContext, useRef } from "react";
 
 import AuthContext from "../../store/auth-context";
 import Card from "../UI/Card/Card";
@@ -49,6 +49,9 @@ const Login = () => {
 
     const ctx = useContext(AuthContext);
 
+    const emailInputRef = useRef();
+    const passwordInputRef = useRef();
+
     const { isValid: emailIsValid } = emailState;
     const { isValid: passwordIsValid } = passwordState;
 
@@ -84,13 +87,20 @@ const Login = () => {
 
     const submitHandler = (event) => {
         event.preventDefault();
-        ctx.onLogin(emailState.value, passwordState.value);
+        if (formIsValid) {
+            ctx.onLogin(emailState.value, passwordState.value);
+        } else if (!emailIsValid) {
+            emailInputRef.current.activate();
+        } else {
+            passwordInputRef.current.activate();
+        }
     };
 
     return (
         <Card className={classes.login}>
             <form onSubmit={submitHandler}>
                 <Input
+                    ref={emailInputRef}
                     label={"E-Mail"}
                     type={"text"}
                     id={"email"}
@@ -100,6 +110,7 @@ const Login = () => {
                     onBlur={validateEmailHandler}
                 />
                 <Input
+                    ref={passwordInputRef}
                     label={"Password"}
                     type={"password"}
                     id={"password"}
@@ -109,11 +120,7 @@ const Login = () => {
                     onBlur={validatePasswordHandler}
                 />
                 <div className={classes.actions}>
-                    <Button
-                        type="submit"
-                        className={classes.btn}
-                        disabled={!formIsValid}
-                    >
+                    <Button type="submit" className={classes.btn}>
                         Login
                     </Button>
                 </div>
